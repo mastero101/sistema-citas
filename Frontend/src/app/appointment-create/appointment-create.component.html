@@ -1,0 +1,24 @@
+<div>
+  <h2>Crear Nueva Cita</h2>
+  <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label for="name">Nombre</label>
+      <input id="name" formControlName="name">
+    </div>
+    <div>
+      <label for="date">Fecha</label>
+      <input id="date" type="date" formControlName="date">
+    </div>
+    <div>
+      <label for="time">Hora</label>
+      <input id="time" type="time" formControlName="time">
+    </div>
+    <div>
+      <label for="description">Descripción</label>
+      <input id="description" formControlName="description">
+    </div>
+    <button type="submit" [disabled]="!appointmentForm.valid">Crear</button>
+  </form>
+</div>
+
+  

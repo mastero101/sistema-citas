@@ -1,0 +1,10 @@
+<div>
+  <h2>Lista de Citas</h2>
+  <div *ngFor="let appointment of appointments">
+    <p><strong>{{ appointment.name }}</strong></p>
+    <p>ID: {{ appointment._id }}</p>
+    <p>{{ appointment.date | date: 'yyyy-MM-dd' }} {{ appointment.date | date: 'HH:mm' }}</p>
+    <p>{{ appointment.description }}</p>
+  </div>
+</div>
+  

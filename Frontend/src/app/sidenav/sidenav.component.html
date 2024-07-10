@@ -1,0 +1,20 @@
+<mat-sidenav-container class="sidenav-container">
+  
+    <mat-sidenav #drawer class="sidenav" fixedInViewport="true" [mode]="mode" [opened]="opened">
+      <mat-nav-list>
+        <a mat-list-item routerLink="list" (click)="toggleSidenav()">Tabla</a>
+        <a mat-list-item routerLink="create" (click)="toggleSidenav()">Registrar</a>
+        <a mat-list-item routerLink="edit" (click)="toggleSidenav()">Editar</a>
+      </mat-nav-list>
+    </mat-sidenav>
+  
+    <mat-sidenav-content>
+        <router-outlet></router-outlet>
+    </mat-sidenav-content>
+    
+</mat-sidenav-container>
+  
+<button mat-icon-button class="toggle-button custom-button" *ngIf="!opened" (click)="toggleSidenav()">
+  <mat-icon>menu</mat-icon>
+</button>
+  
