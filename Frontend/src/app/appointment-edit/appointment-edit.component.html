@@ -1,36 +1,55 @@
 <div class="container">
-  <h2>Editar Citas</h2>
+  <h2>Editar Cita</h2>
   <div class="form-group">
-    <label for="appointment-select">Seleccionar</label>
-    <select id="appointment-select" class="form-control" (change)="onAppointmentSelect($event)">
-      <option *ngFor="let appointment of appointments" [value]="appointment._id">
-        {{ appointment.name }} - {{ appointment.date | date: 'yyyy-MM-dd' }}
-      </option>
-    </select>
+    <mat-form-field appearance="fill">
+      <mat-label>Seleccionar Cita</mat-label>
+      <mat-select id="appointment-select" (selectionChange)="onAppointmentSelect($event)">
+        <mat-option *ngFor="let appointment of appointments" [value]="appointment._id">
+          {{ appointment.name }} - {{ appointment.date | date: 'yyyy-MM-dd' }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
   <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
-      <label for="id">ID</label>
-      <input type="text" id="id" formControlName="id" readonly class="form-control">
+      <mat-form-field appearance="fill">
+        <mat-label>ID</mat-label>
+        <input matInput type="text" id="id" formControlName="id" readonly>
+      </mat-form-field>
     </div>
     <div class="form-group">
-      <label for="name">Nombre</label>
-      <input type="text" id="name" formControlName="name" class="form-control">
+      <mat-form-field appearance="fill">
+        <mat-label>Nombre</mat-label>
+        <input matInput type="text" id="name" formControlName="name">
+      </mat-form-field>
     </div>
     <div class="form-group">
-      <label for="date">Fecha</label>
-      <input type="date" id="date" formControlName="date" class="form-control">
+      <mat-form-field appearance="fill">
+        <mat-label>Fecha</mat-label>
+        <input matInput [matDatepicker]="picker" id="date" formControlName="date">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
     </div>
     <div class="form-group">
-      <label for="time">Hora</label>
-      <input type="time" id="time" formControlName="time" class="form-control">
+      <mat-form-field appearance="fill">
+        <mat-label>Hora</mat-label>
+        <mat-select id="time" formControlName="time">
+          <mat-option *ngFor="let time of availableTimes" [value]="time">{{ time }}</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
     <div class="form-group">
-      <label for="description">Description</label>
-      <textarea id="description" formControlName="description" class="form-control"></textarea>
+      <mat-form-field appearance="fill">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput id="description" formControlName="description"></textarea>
+      </mat-form-field>
     </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <button type="button" class="btn btn-danger" (click)="onDelete()">Delete</button>
+    <div class="form-buttons">
+      <button mat-raised-button color="primary" type="submit" [disabled]="!appointmentForm.valid">Guardar</button>
+      <button mat-raised-button color="warn" type="button" (click)="onDelete()">Eliminar</button>
+    </div>
   </form>
 </div>
+
   

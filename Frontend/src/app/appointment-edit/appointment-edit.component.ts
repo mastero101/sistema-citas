@@ -6,13 +6,26 @@ import { CommonModule } from '@angular/common';
 
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+
 @Component({
   selector: 'app-appointment-edit',
   standalone: true,
   imports: [
     ReactiveFormsModule,
     CommonModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   templateUrl: './appointment-edit.component.html',
   styleUrl: './appointment-edit.component.scss' 
@@ -20,6 +33,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 export class AppointmentEditComponent implements OnInit{
   appointmentForm: FormGroup;
   appointments: any[] = [];
+  availableTimes: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -35,6 +49,8 @@ export class AppointmentEditComponent implements OnInit{
       time: ['', Validators.required],
       description: ['']
     });
+
+    this.availableTimes = this.generateTimes();
   }
 
   ngOnInit(): void {
@@ -46,14 +62,14 @@ export class AppointmentEditComponent implements OnInit{
       appointments => {
         this.appointments = appointments;
       },
-      (error: any) => {
+      error => {
         console.error('Error loading appointments:', error);
       }
     );
   }
 
   onAppointmentSelect(event: any): void {
-    const selectedAppointmentId = event.target.value;
+    const selectedAppointmentId = event.value;
     this.loadAppointmentDetails(selectedAppointmentId);
   }
 
@@ -62,7 +78,7 @@ export class AppointmentEditComponent implements OnInit{
       appointment => {
         const date = new Date(appointment.date);
         const formattedDate = date.toISOString().split('T')[0];
-        const formattedTime = date.toTimeString().split(' ')[0];
+        const formattedTime = this.formatTime(date);
 
         this.appointmentForm.patchValue({
           id: appointment._id,
@@ -72,7 +88,7 @@ export class AppointmentEditComponent implements OnInit{
           description: appointment.description
         });
       },
-      (error: any) => {
+      error => {
         console.error('Error loading appointment details:', error);
       }
     );
@@ -81,42 +97,75 @@ export class AppointmentEditComponent implements OnInit{
   onSubmit(): void {
     if (this.appointmentForm.valid) {
       const formValues = this.appointmentForm.value;
-      const dateTime = `${formValues.date}T${formValues.time}`;
+  
+      // Convertir la hora a formato de 24 horas
+      const time24h = this.convertTimeTo24HourFormat(formValues.time);
+  
+      // Formar la fecha y hora en formato ISO 8601
+      const dateTime = `${formValues.date}T${time24h}:00.000Z`;
+  
       const appointmentData = {
         ...formValues,
         date: dateTime
       };
-
+  
+      console.log('Updating appointment with data:', appointmentData);
+  
       this.appointmentService.updateAppointment(formValues.id, appointmentData).then(() => {
-        // Limpiar el formulario
         this.appointmentForm.reset();
-        // Actualizar la lista de citas
         this.loadAppointments();
-        // Snackbar de confirmacion
         this.snackBar.open('Cita actualizada con éxito', 'Cerrar', {
           duration: 3000
         });
-      }).catch((error: any) => {
+      }).catch(error => {
         console.error('Error updating appointment:', error);
       });
     }
   }
 
   onDelete(): void {
-    if (confirm('Estas Seguro de Eliminar Esta Cita?')) {
+    if (confirm('¿Estás seguro de eliminar esta cita?')) {
       const appointmentId = this.appointmentForm.get('id')?.value;
       this.appointmentService.deleteAppointment(appointmentId).then(() => {
-        // Limpiar el formulario
         this.appointmentForm.reset();
-        // Actualizar la lista de citas
         this.loadAppointments();
-        // Snackbar de confirmacion
         this.snackBar.open('Cita eliminada con éxito', 'Cerrar', {
           duration: 3000
         });
-      }).catch((error: any) => {
+      }).catch(error => {
         console.error('Error deleting appointment:', error);
       });
     }
+  }
+
+  private generateTimes(): string[] {
+    const times: string[] = [];
+    for (let hour = 9; hour <= 21; hour++) {
+      const hour12 = hour > 12 ? hour - 12 : hour;
+      const ampm = hour < 12 ? 'AM' : 'PM';
+      times.push(`${hour12}:00 ${ampm}`);
+      times.push(`${hour12}:30 ${ampm}`);
+    }
+    return times;
+  }
+
+  private formatTime(date: Date): string {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const hours12 = hours % 12 || 12;
+    const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+    return `${hours12}:${minutesStr} ${ampm}`;
+  }
+
+  private convertTimeTo24HourFormat(time: string): string {
+    const [timePart, period] = time.split(' ');
+    let [hours, minutes] = timePart.split(':');
+    
+    if (period === 'PM') {
+      hours = String(Number(hours) + 12);
+    }
+
+    return `${hours}:${minutes}`;
   }
 }

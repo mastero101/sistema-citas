@@ -20,4 +20,11 @@ const appointments = require('./routes/appointments');
 app.use('/api/appointments', appointments);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Export the app for Vercel to use
+module.exports = app;
+
+// If not in a serverless environment, start the server
+if (!process.env.NOW_REGION) {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}

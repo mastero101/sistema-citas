@@ -5,7 +5,7 @@ import axios from 'axios';
   providedIn: 'root'
 })
 export class AppointmentService {
-  private baseURL: string = 'http://localhost:5000/api/appointments';
+  private baseURL: string = 'https://backend-nine-livid.vercel.app/api/appointments';
 
   constructor() { }
 

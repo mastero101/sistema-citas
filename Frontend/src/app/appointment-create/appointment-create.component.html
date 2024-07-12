@@ -1,24 +1,34 @@
-<div>
+<div class="container">
   <h2>Crear Nueva Cita</h2>
   <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
-    <div>
-      <label for="name">Nombre</label>
-      <input id="name" formControlName="name">
+    <div class="form-group">
+      <mat-form-field appearance="fill">
+        <mat-label>Nombre</mat-label>
+        <input matInput id="name" formControlName="name" placeholder="Nombre">
+      </mat-form-field>
     </div>
-    <div>
-      <label for="date">Fecha</label>
-      <input id="date" type="date" formControlName="date">
+    <div class="form-group">
+      <mat-form-field appearance="fill">
+        <mat-label>Fecha</mat-label>
+        <input matInput [matDatepicker]="picker" id="date" formControlName="date">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
     </div>
-    <div>
-      <label for="time">Hora</label>
-      <input id="time" type="time" formControlName="time">
+    <div class="form-group">
+      <mat-form-field appearance="fill">
+        <mat-label>Hora</mat-label>
+        <mat-select id="time" formControlName="time">
+          <mat-option *ngFor="let time of times" [value]="time">{{ time }}</mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
-    <div>
-      <label for="description">Descripción</label>
-      <input id="description" formControlName="description">
+    <div class="form-group">
+      <mat-form-field appearance="fill">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput id="description" formControlName="description" placeholder="Descripción"></textarea>
+      </mat-form-field>
     </div>
-    <button type="submit" [disabled]="!appointmentForm.valid">Crear</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="!appointmentForm.valid">Crear</button>
   </form>
-</div>
-
-  
+</div>  
