@@ -1,5 +1,6 @@
 const { format } = require('date-fns');
 const { es } = require('date-fns/locale');
+const moment = require('moment');
 const TelegramBot = require('node-telegram-bot-api');
 const Appointment = require('../models/Appointment');
 
@@ -7,10 +8,95 @@ const Appointment = require('../models/Appointment');
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
-// Manejador para iniciar el bot
+// Manejador para iniciar el bot con teclado de sugerencias de comandos
 bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id, "¡Hola! Soy tu bot de citas médicas. ¿Cómo puedo ayudarte hoy?");
+    const chatId = msg.chat.id;
+  
+    const welcomeMessage = `
+    ¡Hola! Soy tu bot de citas médicas. Aquí tienes los comandos que puedes utilizar:
+    
+    /crearcita - Crear una nueva cita médica
+    /consultarcita - Consultar una cita existente por nombre, fecha o ambos
+    /cancelarcita - Cancelar una cita existente
+    /help - Ver esta lista de comandos de nuevo
+    
+    ¿Cómo puedo ayudarte hoy?
+    `;
+  
+    // Enviar mensaje de bienvenida junto con las sugerencias de comandos
+    bot.sendMessage(chatId, welcomeMessage, {
+      reply_markup: {
+        keyboard: [
+          [{ text: '/crearcita' }],
+          [{ text: '/consultarcita' }],
+          [{ text: '/cancelarcita' }],
+          [{ text: '/help' }]
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true
+      }
+    });
 });
+  
+// Manejador para mostrar la ayuda en cualquier momento con teclado de sugerencias
+bot.onText(/\/help/, (msg) => {
+    const chatId = msg.chat.id;
+  
+    const helpMessage = `
+    Aquí tienes los comandos que puedes utilizar:
+    
+    /crearcita - Crear una nueva cita médica
+    /consultarcita - Consultar una cita existente por nombre, fecha o ambos
+    /cancelarcita - Cancelar una cita existente
+    
+    Estoy aquí para ayudarte. ¿Qué necesitas hacer hoy?
+    `;
+  
+    // Enviar mensaje de ayuda junto con las sugerencias de comandos
+    bot.sendMessage(chatId, helpMessage, {
+      reply_markup: {
+        keyboard: [
+          [{ text: '/crearcita' }],
+          [{ text: '/consultarcita' }],
+          [{ text: '/cancelarcita' }],
+          [{ text: '/help' }]
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true
+      }
+    });
+});
+
+  function generateDateKeyboard() {
+    const keyboard = [];
+    const today = moment();
+    
+    for (let i = 0; i < 7; i++) {
+      const date = today.clone().add(i, 'days');
+      keyboard.push([{
+        text: date.format('DD/MM/YYYY'),
+        callback_data: `date_${date.format('YYYY-MM-DD')}`
+      }]);
+    }
+    
+    return keyboard;
+  }
+  
+  function generateTimeKeyboard() {
+    const keyboard = [];
+    const startTime = moment().set({hour: 9, minute: 0});
+    const endTime = moment().set({hour: 21, minute: 0});
+    
+    while (startTime.isSameOrBefore(endTime)) {
+      keyboard.push([{
+        text: startTime.format('HH:mm'),
+        callback_data: `time_${startTime.format('HH:mm')}`
+      }]);
+      startTime.add(30, 'minutes');
+    }
+    
+    return keyboard;
+  }
 
 // Función para validar la hora
 function isValidTime(time) {
@@ -28,69 +114,129 @@ function isValidTime(time) {
     return appointmentTime >= start && appointmentTime <= end;
 }
 
-// Manejador para crear una cita
+let currentAppointment = {};
+
 bot.onText(/\/crearcita/, async (msg) => {
     const chatId = msg.chat.id;
-  
+    currentAppointment = {};
+
     // Pregunta el nombre del paciente
     bot.sendMessage(chatId, "Por favor, proporciona el nombre del paciente:");
-  
+
     bot.once('message', (nameMsg) => {
-        const name = nameMsg.text;
-  
+        currentAppointment.name = nameMsg.text;
+        console.log("Nombre registrado:", currentAppointment.name);
+
         // Pregunta la fecha de la cita
-        bot.sendMessage(chatId, "Por favor, proporciona la fecha de la cita en formato YYYY-MM-DD:");
-  
-        bot.once('message', (dateMsg) => {
-            const date = new Date(dateMsg.text);
-  
-            // Pregunta la hora de la cita
-            bot.sendMessage(chatId, "Por favor, proporciona la hora de la cita en formato HH:MM (solo entre 09:00 y 21:00):");
-  
-            bot.once('message', async (timeMsg) => {
-                const time = timeMsg.text;
-  
-                if (!isValidTime(time)) {
-                    bot.sendMessage(chatId, "La hora proporcionada no es válida. Debe estar entre 09:00 y 21:00.");
-                    return;
-                }
-  
-                const appointmentDate = new Date(date);
-                const [hours, minutes] = time.split(':').map(Number);
-                appointmentDate.setHours(hours, minutes);
-  
-                // Pregunta la descripción de la cita
-                bot.sendMessage(chatId, "Por favor, proporciona una descripción para la cita:");
-  
-                bot.once('message', async (descriptionMsg) => {
-                    const description = descriptionMsg.text;
-  
-                    const appointment = new Appointment({
-                        name,
-                        date: appointmentDate,
-                        description,
-                        time
-                    });
-  
-                    try {
-                        const newAppointment = await appointment.save();
-                        bot.sendMessage(chatId, "¡Cita creada exitosamente!");
-                    } catch (err) {
-                        bot.sendMessage(chatId, "Hubo un error al crear la cita. Inténtalo de nuevo.");
-                    }
-                });
-            });
+        bot.sendMessage(chatId, "Selecciona la fecha de la cita o introduce en formato YYYY-MM-DD", {
+            reply_markup: {
+                inline_keyboard: generateDateKeyboard()
+            }
         });
     });
 });
 
+bot.on('callback_query', async (query) => {
+    const chatId = query.message.chat.id;
+    const [action, value] = query.data.split('_');
+
+    if (action === 'date') {
+        currentAppointment.date = value;
+        console.log("Fecha seleccionada:", currentAppointment.date);
+        bot.answerCallbackQuery(query.id);
+        bot.sendMessage(chatId, "Selecciona la hora de la cita:", {
+            reply_markup: {
+                inline_keyboard: generateTimeKeyboard()
+            }
+        });
+    } else if (action === 'time') {
+        currentAppointment.time = value;
+        console.log("Hora seleccionada:", currentAppointment.time);
+        bot.answerCallbackQuery(query.id);
+        bot.sendMessage(chatId, "Por favor, proporciona una descripción para la cita:");
+    }
+});
+
+bot.on('message', (msg) => {
+    const chatId = msg.chat.id;
+    
+    if (!currentAppointment.date && msg.text.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        currentAppointment.date = msg.text;
+        console.log("Fecha introducida manualmente:", currentAppointment.date);
+        askForTime(chatId);
+    } else if (!currentAppointment.time && msg.text.match(/^\d{2}:\d{2}$/)) {
+        handleTimeInput(chatId, msg.text);
+    } else if (currentAppointment.time && !currentAppointment.description) {
+        handleDescriptionInput(chatId, msg.text);
+    }
+});
+
+function askForTime(chatId) {
+    bot.sendMessage(chatId, "Por favor, proporciona la hora de la cita en formato HH:MM (solo entre 09:00 y 21:00):");
+}
+
+function handleTimeInput(chatId, time) {
+    if (!isValidTime(time)) {
+        bot.sendMessage(chatId, "La hora proporcionada no es válida. Debe estar entre 09:00 y 21:00.");
+        return;
+    }
+    
+    currentAppointment.time = time;
+    console.log("Hora registrada:", currentAppointment.time);
+    
+    bot.sendMessage(chatId, "Por favor, proporciona una descripción para la cita:");
+}
+
+function handleDescriptionInput(chatId, description) {
+    currentAppointment.description = description;
+    console.log("Descripción registrada:", currentAppointment.description);
+
+    createAppointment(chatId);
+}
+
+
+function createAppointment(chatId) {
+    const [year, month, day] = currentAppointment.date.split('-').map(Number);
+    const [hours, minutes] = currentAppointment.time.split(':').map(Number);
+
+    // Crear la fecha en la zona horaria local
+    const appointmentDate = new Date(year, month - 1, day, hours, minutes);
+
+    const appointment = new Appointment({
+        name: currentAppointment.name,
+        date: appointmentDate,
+        description: currentAppointment.description,
+        time: currentAppointment.time
+    });
+
+    appointment.save()
+        .then(() => {
+            console.log("Cita guardada:", appointment);
+            bot.sendMessage(chatId, "¡Cita creada exitosamente!");
+            currentAppointment = {}; // Limpiar el objeto de cita actual
+        })
+        .catch((err) => {
+            console.error("Error al guardar la cita:", err);
+            bot.sendMessage(chatId, "Hubo un error al crear la cita. Inténtalo de nuevo.");
+        });
+}
 
 // Manejador para consultar citas por nombre, fecha, o ambos
 bot.onText(/\/consultarcita/, (msg) => {
     const chatId = msg.chat.id;
   
-    // Pregunta si desea buscar por nombre, fecha, o ambos
-    bot.sendMessage(chatId, "¿Cómo deseas buscar la cita? Escribe 'nombre', 'fecha', o 'ambos':");
+    //Pregunta si desea buscar por nombre, fecha, o ambos en el menu de opciones o tipeado
+    bot.sendMessage(chatId, "¿Cómo deseas buscar la cita? Escribe 'Nombre', 'Fecha', o 'Ambos':", {
+        reply_markup: {
+          keyboard: [
+            [{ text: 'Nombre' }],
+            [{ text: 'Fecha' }],
+            [{ text: 'Ambos' }],
+          ],
+          resize_keyboard: true,
+          one_time_keyboard: true
+        }
+    });
   
     bot.once('message', (filterMsg) => {
       const filter = filterMsg.text.toLowerCase();
@@ -221,7 +367,7 @@ bot.onText(/\/cancelarcita/, async (msg) => {
     });
 });
 
-// Manejador para el callback de los botones de confirmación
+// Manejador para el callback de los botones de confirmación en cancelarcita
 bot.on('callback_query', async (query) => {
     const chatId = query.message.chat.id;
     const callbackData = query.data.split('_');
@@ -263,5 +409,25 @@ bot.on('callback_query', async (query) => {
     } else if (query.data === 'cancel') {
         // Cancelar la operación
         bot.sendMessage(chatId, "Cancelación de la cita abortada.");
+    }
+});
+
+// Metodo relacionado al datepicker para la creacion de cita
+bot.on('callback_query', async (query) => {
+    const chatId = query.message.chat.id;
+    const [action, value] = query.data.split('_');
+  
+    if (action === 'date') {
+      currentAppointment.date = value;
+      bot.answerCallbackQuery(query.id);
+      bot.sendMessage(chatId, "Selecciona la hora de la cita:", {
+        reply_markup: {
+          inline_keyboard: generateTimeKeyboard()
+        }
+      });
+    } else if (action === 'time') {
+      currentAppointment.time = value;
+      bot.answerCallbackQuery(query.id);
+      
     }
 });
