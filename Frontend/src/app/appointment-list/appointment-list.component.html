@@ -1,10 +1,33 @@
-<div>
+<div class="appointment-list-container">
   <h2>Lista de Citas</h2>
-  <div *ngFor="let appointment of appointments">
-    <p><strong>{{ appointment.name }}</strong></p>
-    <p>ID: {{ appointment._id }}</p>
-    <p>{{ appointment.date | date: 'yyyy-MM-dd' }} {{ appointment.date | date: 'HH:mm' }}</p>
-    <p>{{ appointment.description }}</p>
+
+  <div class="filters">
+    <input 
+      type="text" 
+      placeholder="Buscar por nombre..." 
+      [(ngModel)]="searchTerm" 
+      class="search-input" 
+    />
+
+    <mat-form-field appearance="fill">
+      <mat-label>Buscar por fecha</mat-label>
+      <input 
+        matInput 
+        [matDatepicker]="picker" 
+        placeholder="Selecciona una fecha" 
+        [(ngModel)]="selectedDate" 
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <div class="appointment-cards">
+    <div *ngFor="let appointment of filteredAppointments()" class="appointment-card">
+      <p><strong>{{ appointment.name }}</strong></p>
+      <p>ID: {{ appointment._id }}</p>
+      <p>{{ appointment.date | date: 'yyyy-MM-dd' }} {{ appointment.date | date: 'HH:mm' }}</p>
+      <p>{{ appointment.description }}</p>
+    </div>
   </div>
 </div>
-  
