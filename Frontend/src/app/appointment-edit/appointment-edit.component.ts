@@ -77,9 +77,12 @@ export class AppointmentEditComponent implements OnInit{
     this.appointmentService.getAppointmentById(id).then(
       appointment => {
         const date = new Date(appointment.date);
-        const formattedDate = date.toISOString().split('T')[0];
-        const formattedTime = this.formatTime(date);
-
+  
+        // Convertir la hora UTC a hora local
+        const localDate = new Date(date.getTime());
+        const formattedDate = localDate.toISOString().split('T')[0];
+        const formattedTime = this.formatTime(localDate);
+  
         this.appointmentForm.patchValue({
           id: appointment._id,
           name: appointment.name,
@@ -93,7 +96,7 @@ export class AppointmentEditComponent implements OnInit{
       }
     );
   }
-
+  
   onSubmit(): void {
     if (this.appointmentForm.valid) {
       const formValues = this.appointmentForm.value;
@@ -101,15 +104,12 @@ export class AppointmentEditComponent implements OnInit{
       // Convertir la hora a formato de 24 horas
       const time24h = this.convertTimeTo24HourFormat(formValues.time);
   
-      // Formar la fecha y hora en formato ISO 8601
-      const dateTime = `${formValues.date}T${time24h}:00.000Z`;
-  
+      // Formar la fecha y hora en formato ISO 8601 y ajustarla a la zona horaria local
+      const localDateTime = new Date(`${formValues.date}T${time24h}:00`);
       const appointmentData = {
         ...formValues,
-        date: dateTime
+        date: localDateTime.toISOString() // Esto lo convierte a UTC automáticamente
       };
-  
-      console.log('Updating appointment with data:', appointmentData);
   
       this.appointmentService.updateAppointment(formValues.id, appointmentData).then(() => {
         this.appointmentForm.reset();

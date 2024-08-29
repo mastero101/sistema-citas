@@ -1,14 +1,13 @@
-import { Component, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-import { RouterModule  } from '@angular/router';
-
+import { Component, ViewChild, OnInit, HostListener, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav } from '@angular/material/sidenav';
-import { MatDrawerMode } from '@angular/material/sidenav';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 import { AppointmentEditComponent } from '../appointment-edit/appointment-edit.component';
 import { AppointmentListComponent } from '../appointment-list/appointment-list.component';
@@ -24,31 +23,55 @@ import { AppointmentCreateComponent } from '../appointment-create/appointment-cr
     MatToolbarModule,
     MatListModule,
     MatIconModule,
-    MatSidenav,
+    MatButtonModule,
     AppointmentCreateComponent,
     AppointmentEditComponent,
     AppointmentListComponent
   ],
   templateUrl: './sidenav.component.html',
-  styleUrl: './sidenav.component.scss'
+  styleUrls: ['./sidenav.component.scss']
 })
-export class SidenavComponent{
+export class SidenavComponent implements OnInit {
   @ViewChild('drawer') drawer!: MatSidenav;
 
-  mode: MatDrawerMode = 'side';
+  mode: 'side' | 'over' = 'side';
   opened: boolean = true;
+  isBrowser: boolean;
 
-  constructor() {}
+  constructor(
+    private breakpointObserver: BreakpointObserver,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
-  toggleSidenav2() {
-    this.opened = !this.opened;
-    if (this.drawer) {
-      this.drawer.toggle();
+  ngOnInit() {
+    if (this.isBrowser) {
+      this.breakpointObserver.observe([Breakpoints.Handset])
+        .subscribe(result => {
+          this.mode = result.matches ? 'over' : 'side';
+          this.opened = !result.matches;
+        });
     }
   }
 
-  toggleSidenav(){
-    console.log("works")
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    if (this.isBrowser) {
+      this.checkScreenSize();
+    }
   }
 
+  checkScreenSize() {
+    const isHandset = this.breakpointObserver.isMatched(Breakpoints.Handset);
+    this.mode = isHandset ? 'over' : 'side';
+    this.opened = !isHandset;
+  }
+
+  toggleSidenav() {
+    if (this.drawer) {
+      this.drawer.toggle();
+      this.opened = this.drawer.opened;
+    }
+  }
 }

@@ -2,32 +2,36 @@
   <h2>Lista de Citas</h2>
 
   <div class="filters">
-    <input 
-      type="text" 
-      placeholder="Buscar por nombre..." 
-      [(ngModel)]="searchTerm" 
-      class="search-input" 
-    />
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar por nombre</mat-label>
+      <input matInput [(ngModel)]="searchTerm" placeholder="Ej. Juan Pérez">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
 
-    <mat-form-field appearance="fill">
+    <mat-form-field appearance="outline">
       <mat-label>Buscar por fecha</mat-label>
-      <input 
-        matInput 
-        [matDatepicker]="picker" 
-        placeholder="Selecciona una fecha" 
-        [(ngModel)]="selectedDate" 
-      />
+      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" placeholder="Selecciona una fecha">
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
   </div>
 
   <div class="appointment-cards">
-    <div *ngFor="let appointment of filteredAppointments()" class="appointment-card">
-      <p><strong>{{ appointment.name }}</strong></p>
-      <p>ID: {{ appointment._id }}</p>
-      <p>{{ appointment.date | date: 'yyyy-MM-dd' }} {{ appointment.date | date: 'HH:mm' }}</p>
-      <p>{{ appointment.description }}</p>
-    </div>
+    <mat-card *ngFor="let appointment of filteredAppointments()" class="appointment-card">
+      <mat-card-header>
+        <mat-card-title>{{ appointment.name }}</mat-card-title>
+        <mat-card-subtitle>ID: {{ appointment._id }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="appointment-date">
+          <mat-icon>event</mat-icon>
+          {{ appointment.date | date: 'yyyy-MM-dd HH:mm' }}
+        </p>
+        <p>
+          <mat-icon>description</mat-icon>
+          {{ appointment.description }}
+        </p>
+      </mat-card-content>
+    </mat-card>
   </div>
 </div>

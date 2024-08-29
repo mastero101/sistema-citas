@@ -1,32 +1,40 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { MatNativeDateModule } from '@angular/material/core';
 
 import { AppointmentService } from '../services/appointment.service';
+
+interface Appointment {
+  _id: string;
+  name: string;
+  date: Date;
+  description: string;
+}
 
 @Component({
   selector: 'app-appointment-list',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
     CommonModule,
     FormsModule,
     MatCardModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
+    MatIconModule,
     MatNativeDateModule
   ],
   templateUrl: './appointment-list.component.html',
   styleUrls: ['./appointment-list.component.scss']
 })
 export class AppointmentListComponent implements OnInit {
-  appointments: any[] = [];
+  appointments: Appointment[] = [];
   searchTerm: string = '';
   selectedDate: Date | null = null;
 
@@ -40,11 +48,11 @@ export class AppointmentListComponent implements OnInit {
     }
   }
 
-  filteredAppointments() {
+  filteredAppointments(): Appointment[] {
     return this.appointments.filter(appointment => {
       const matchesName = appointment.name.toLowerCase().includes(this.searchTerm.toLowerCase());
       const matchesDate = this.selectedDate
-        ? new Date(appointment.date).toDateString() === this.selectedDate?.toDateString()
+        ? new Date(appointment.date).toDateString() === this.selectedDate.toDateString()
         : true;
 
       return matchesName && matchesDate;
