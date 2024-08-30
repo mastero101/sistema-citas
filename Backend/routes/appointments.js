@@ -31,7 +31,8 @@ router.post('/', async (req, res) => {
   const appointment = new Appointment({
     name: req.body.name,
     date: req.body.date,
-    description: req.body.description
+    description: req.body.description,
+    time: req.body.time
   });
 
   try {

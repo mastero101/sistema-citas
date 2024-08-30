@@ -14,20 +14,19 @@
   
   .toolbar {
     display: flex;
-    justify-content: center;
     align-items: center;
-    height: 64px; // Ajusta esta altura según tus necesidades
+    justify-content: space-between; // Distribuye el espacio entre los elementos
+    padding: 0 16px; // Añade un poco de padding horizontal
   }
   
   .toolbar-title {
     flex: 1;
     text-align: center;
-    margin-left: 40px; // Compensar el espacio del botón de menú
   }
   
   .menu-button {
-    position: absolute;
-    left: 16px;
+    // Elimina la posición absoluta
+    margin-right: 16px; // Añade un margen a la derecha del botón
   }
   
   .content {
@@ -41,7 +40,9 @@
   }
   
   .content {
-    flex: 1;
+    padding: 16px;
+    overflow-y: auto; // Permite desplazamiento si el contenido es muy largo
+    height: calc(100vh - 64px); // Resta la altura de la barra de navegación
   }
   
   @media (max-width: 599px) {
@@ -56,5 +57,9 @@
   
     .toolbar {
       height: 56px; // Altura más pequeña para dispositivos móviles
+    }
+
+    .main-content {
+      height: calc(100vh - 56px); // Ajusta para la altura de la barra en móviles
     }
   }

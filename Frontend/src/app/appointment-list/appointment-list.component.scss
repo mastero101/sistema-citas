@@ -28,8 +28,8 @@
 
   .appointment-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
     width: 100%;
     max-width: 1200px;
 
@@ -67,7 +67,7 @@
 
 @media (max-width: 768px) {
   .appointment-list-container {
-    padding: 12px;
+    padding: 8px;
 
     h2 {
       font-size: 1.25rem;

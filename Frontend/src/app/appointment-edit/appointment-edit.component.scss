@@ -1,5 +1,5 @@
 .container {
-  max-width: 600px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px;
   background-color: #403d3d;
@@ -19,7 +19,7 @@ h2 {
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .form-buttons {
@@ -35,12 +35,21 @@ button {
 }
 
 @media (max-width: 600px) {
+  .container {
+    padding: 16px;
+  }
+
   .form-buttons {
     flex-direction: column;
+    margin-top: 16px;
   }
 
   button {
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+  }
+
+  button[color="warn"] {
+    margin-bottom: 0;
   }
 }

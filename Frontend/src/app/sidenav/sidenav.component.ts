@@ -47,10 +47,11 @@ export class SidenavComponent implements OnInit {
 
   ngOnInit() {
     if (this.isBrowser) {
-      this.breakpointObserver.observe([Breakpoints.Handset])
+      this.breakpointObserver.observe([Breakpoints.Handset, Breakpoints.Tablet])
         .subscribe(result => {
           this.mode = result.matches ? 'over' : 'side';
           this.opened = !result.matches;
+          this.checkScreenSize();
         });
     }
   }
@@ -64,8 +65,15 @@ export class SidenavComponent implements OnInit {
 
   checkScreenSize() {
     const isHandset = this.breakpointObserver.isMatched(Breakpoints.Handset);
-    this.mode = isHandset ? 'over' : 'side';
-    this.opened = !isHandset;
+    const isTablet = this.breakpointObserver.isMatched(Breakpoints.Tablet);
+    
+    if (isHandset || isTablet) {
+      this.mode = 'over';
+      this.opened = false;
+    } else {
+      this.mode = 'side';
+      this.opened = true;
+    }
   }
 
   toggleSidenav() {
