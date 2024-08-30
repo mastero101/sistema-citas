@@ -1,84 +1,58 @@
-.appointment-list-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.list-container {
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.filters {
+  margin-bottom: 24px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.appointment-cards {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.appointment-card {
   width: 100%;
   box-sizing: border-box;
-  padding: 16px;
-  
-  h2 {
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    color: #333;
-    text-align: center;
+}
+
+mat-card-content {
+  p {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+
+  .appointment-date {
+    font-weight: bold;
+    color: #4caf50;
+  }
+}
+
+@media (min-width: 600px) {
+  .list-container {
+    max-width: 1200px;
+    margin: 0 auto;
   }
 
   .filters {
     display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 600px;
     gap: 16px;
-    margin-bottom: 20px;
-
-    mat-form-field {
-      width: 100%;
-    }
-  }
-
-  .appointment-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-    width: 100%;
-    max-width: 1200px;
-
-    .appointment-card {
-      width: 100%;
-      box-sizing: border-box;
-      transition: transform 0.2s, box-shadow 0.2s;
-    
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-      }
-
-      mat-card-content {
-        p {
-          display: flex;
-          align-items: center;
-          margin: 8px 0;
-          font-size: 1rem;
-          color: #ffffff;
-
-          mat-icon {
-            margin-right: 8px;
-          }
-        }
-
-        .appointment-date {
-          font-weight: bold;
-          color: #08db0f;
-        }
-      }
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .appointment-list-container {
-    padding: 8px;
-
-    h2 {
-      font-size: 1.25rem;
-    }
-
-    .filters {
-      max-width: 100%;
-    }
-
-    .appointment-cards {
-      grid-template-columns: 1fr;
-    }
   }
 }
