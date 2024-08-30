@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit, HostListener, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, ViewChild, OnInit, OnDestroy, HostListener, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -7,7 +7,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav } from '@angular/material/sidenav';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { BreakpointObserver, Breakpoints, BreakpointState } from '@angular/cdk/layout';
+import { Subscription } from 'rxjs';
 
 import { AppointmentEditComponent } from '../appointment-edit/appointment-edit.component';
 import { AppointmentListComponent } from '../appointment-list/appointment-list.component';
@@ -31,12 +32,13 @@ import { AppointmentCreateComponent } from '../appointment-create/appointment-cr
   templateUrl: './sidenav.component.html',
   styleUrls: ['./sidenav.component.scss']
 })
-export class SidenavComponent implements OnInit {
+export class SidenavComponent implements OnInit, OnDestroy {
   @ViewChild('drawer') drawer!: MatSidenav;
 
   mode: 'side' | 'over' = 'side';
   opened: boolean = true;
   isBrowser: boolean;
+  private breakpointSubscription: Subscription | undefined;
 
   constructor(
     private breakpointObserver: BreakpointObserver,
@@ -47,12 +49,23 @@ export class SidenavComponent implements OnInit {
 
   ngOnInit() {
     if (this.isBrowser) {
-      this.breakpointObserver.observe([Breakpoints.Handset, Breakpoints.Tablet])
-        .subscribe(result => {
-          this.mode = result.matches ? 'over' : 'side';
-          this.opened = !result.matches;
-          this.checkScreenSize();
+      this.breakpointSubscription = this.breakpointObserver
+        .observe([Breakpoints.Handset, Breakpoints.Tablet])
+        .subscribe((state: BreakpointState) => {
+          if (state.matches) {
+            this.mode = 'over';
+            this.opened = false;
+          } else {
+            this.mode = 'side';
+            this.opened = true;
+          }
         });
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.breakpointSubscription) {
+      this.breakpointSubscription.unsubscribe();
     }
   }
 
@@ -79,7 +92,12 @@ export class SidenavComponent implements OnInit {
   toggleSidenav() {
     if (this.drawer) {
       this.drawer.toggle();
-      this.opened = this.drawer.opened;
+    }
+  }
+
+  closeSidenavIfOverMode() {
+    if (this.mode === 'over' && this.drawer) {
+      this.drawer.close();
     }
   }
 }

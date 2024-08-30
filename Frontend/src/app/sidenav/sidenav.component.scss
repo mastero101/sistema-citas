@@ -1,65 +1,70 @@
 .sidenav-container {
-    height: 100%;
-  }
-  
-  .sidenav {
-    width: 250px;
-  }
-  
-  .mat-toolbar.mat-primary {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
-  
-  .toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; // Distribuye el espacio entre los elementos
-    padding: 0 16px; // Añade un poco de padding horizontal
-  }
-  
-  .toolbar-title {
-    flex: 1;
-    text-align: center;
-  }
-  
-  .menu-button {
-    // Elimina la posición absoluta
-    margin-right: 16px; // Añade un margen a la derecha del botón
-  }
-  
-  .content {
-    padding: 16px;
-  }
-  
-  .mat-sidenav-content {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  
-  .content {
-    padding: 16px;
-    overflow-y: auto; // Permite desplazamiento si el contenido es muy largo
-    height: calc(100vh - 64px); // Resta la altura de la barra de navegación
-  }
-  
-  @media (max-width: 599px) {
-    .sidenav {
-      width: 100%;
-      max-width: 300px;
-    }
-  
-    .toolbar-title {
-      font-size: 18px;
-    }
-  
-    .toolbar {
-      height: 56px; // Altura más pequeña para dispositivos móviles
-    }
+  height: 100%;
+  overflow: hidden;
+}
 
-    .main-content {
-      height: calc(100vh - 56px); // Ajusta para la altura de la barra en móviles
-    }
+.sidenav {
+  width: 250px;
+}
+
+.mat-toolbar.mat-primary {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 64px;
+}
+
+.toolbar-title {
+  flex: 1;
+  text-align: center;
+  font-size: 20px;
+}
+
+.menu-button {
+  margin-right: 16px;
+}
+
+.content {
+  padding: 16px;
+  overflow-y: auto;
+  height: calc(100vh - 64px);
+}
+
+mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+@media (max-width: 599px) {
+  .sidenav {
+    width: 100%;
+    max-width: 300px;
   }
+
+  .toolbar {
+    height: 56px;
+  }
+
+  .toolbar-title {
+    font-size: 18px;
+  }
+
+  .content {
+    height: calc(100vh - 56px);
+    padding: 12px;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 959px) {
+  .sidenav {
+    width: 300px;
+  }
+}
