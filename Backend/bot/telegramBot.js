@@ -1,4 +1,3 @@
-
 const { format } = require('date-fns');
 const { es } = require('date-fns/locale');
 const moment = require('moment');
