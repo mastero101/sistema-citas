@@ -1,11 +1,18 @@
+
 const { format } = require('date-fns');
 const { es } = require('date-fns/locale');
 const moment = require('moment');
 const TelegramBot = require('node-telegram-bot-api');
 const Appointment = require('../models/Appointment');
 
-// Obtén el token del bot desde las variables de entorno
+require('dotenv').config();
 const token = process.env.TELEGRAM_BOT_TOKEN;
+
+if (!token) {
+    console.error("Error: El token del bot de Telegram no está proporcionado.");
+    process.exit(1); // Salir si no hay token
+}
+
 const bot = new TelegramBot(token, { polling: true });
 
 // Manejador para iniciar el bot con teclado de sugerencias de comandos
